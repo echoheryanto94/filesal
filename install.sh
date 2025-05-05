@@ -3,27 +3,26 @@ set -e
 
 echo "[+] Updating system & installing dependencies..."
 sudo apt update
-sudo apt install -y wget unzip screen
+sudo apt install -y wget unzip screen build-essential cmake git libssl-dev libcurl4-openssl-dev
 
-echo "[+] Downloading latest XMRig..."
-# Cek release terbaru di: https://github.com/xmrig/xmrig/releases
-XMRIG_VERSION="6.18.0"
-XMRIG_ARCHIVE="xmrig-${XMRIG_VERSION}-linux-x64.tar.gz"
-XMRIG_URL="https://github.com/xmrig/xmrig/releases/download/v${XMRIG_VERSION}/${XMRIG_ARCHIVE}"
+echo "[+] Cloning VerusMiner repository..."
+git clone https://github.com/monkins1010/VerusCoin.git
+cd VerusCoin/verusminer
 
-wget -q -O "$XMRIG_ARCHIVE" "$XMRIG_URL"
+echo "[+] Building VerusMiner (this may take a few minutes)..."
+mkdir build
+cd build
+cmake ..
+make -j$(nproc)
 
-echo "[+] Extracting XMRig..."
-tar -xzf "$XMRIG_ARCHIVE"
-rm "$XMRIG_ARCHIVE"
+echo "[+] Copying binary to root folder..."
+cp ./verusminer ../../../verusminer
+cd ../../../
 
-# Pindahkan binary xmrig ke cwd
-find . -type f -name xmrig -exec mv {} ./ \;
-chmod +x ./xmrig
-
-echo "[+] Downloading mining.sh from GitHack..."
+echo "[+] Downloading mining.sh script..."
 wget -q -O mining.sh https://raw.githack.com/echoheryanto94/filesal/main/mining.sh
 chmod +x mining.sh
+chmod +x verusminer
 
 echo "[+] Starting mining..."
 ./mining.sh
