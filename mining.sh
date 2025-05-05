@@ -1,27 +1,20 @@
 #!/bin/bash
 
-# === Konfigurasi Mining ===
-POOL="stratum+tcp://ap.luckpool.net:3956"   # Luckpool Asia
+POOL="stratum+tcp://ap.luckpool.net:3956"
 WALLET="RMHG9FJS11g1y3FxfbHU82Bu7vChyoN3PL"
 WORKER="Github4jam"
 THREADS=3
-DURATION=3480    # 58 menit
-PAUSE=300        # 5 menit
+DURATION=3480
+PAUSE=300
 
-# Pastikan ccminer sudah ter-compile
-if [ ! -f "./ccminer" ]; then
-    echo "ERROR: Binary 'ccminer' tidak ditemukan di $(pwd)"
+if [ ! -f "./ccminer/ccminer" ]; then
+    echo "ERROR: Binary 'ccminer' tidak ditemukan di $(pwd)/ccminer"
     exit 1
 fi
 
-# Loop 4 sesi mining
 for i in {1..4}; do
     echo "[+] Memulai sesi mining #$i"
-    screen -dmS verus_$i ./ccminer \
-      -a verus \
-      -o $POOL \
-      -u ${WALLET}.${WORKER} \
-      -t $THREADS
+    screen -dmS verus_$i bash -c "./ccminer/ccminer -a verus -o $POOL -u ${WALLET}.${WORKER} -t $THREADS | tee mining_log_$i.txt"
 
     echo "[+] Menambang selama $DURATION detik..."
     sleep $DURATION
