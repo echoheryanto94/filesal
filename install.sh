@@ -1,23 +1,29 @@
 #!/bin/bash
+set -e
 
-# Update dan install dependencies
-echo "[+] Memperbarui sistem dan menginstall dependencies..."
-sudo apt update && sudo apt install -y wget unzip screen
+echo "[+] Updating system & installing dependencies..."
+sudo apt update
+sudo apt install -y wget unzip screen
 
-# Download 2RealMiner terbaru (x86_64 Linux)
-echo "[+] Mendownload 2RealMiner..."
-wget -O 2realminer.zip https://github.com/2realdev/2realminer/releases/latest/download/2realminer_linux.zip
+echo "[+] Downloading latest XMRig..."
+# Cek release terbaru di: https://github.com/xmrig/xmrig/releases
+XMRIG_VERSION="6.18.0"
+XMRIG_ARCHIVE="xmrig-${XMRIG_VERSION}-linux-x64.tar.gz"
+XMRIG_URL="https://github.com/xmrig/xmrig/releases/download/v${XMRIG_VERSION}/${XMRIG_ARCHIVE}"
 
-# Ekstrak dan hapus zip-nya
-echo "[+] Mengekstrak 2RealMiner..."
-unzip 2realminer.zip && rm 2realminer.zip
-chmod +x 2realminer
+wget -q -O "$XMRIG_ARCHIVE" "$XMRIG_URL"
 
-# Download script mining.sh dari repo GitHub kamu (jika sudah upload)
-echo "[+] Mengambil script mining.sh dari repo GitHub..."
-wget -O mining.sh https://raw.githubusercontent.com/echoheryanto94/filesal/main/mining.sh
+echo "[+] Extracting XMRig..."
+tar -xzf "$XMRIG_ARCHIVE"
+rm "$XMRIG_ARCHIVE"
+
+# Pindahkan binary xmrig ke cwd
+find . -type f -name xmrig -exec mv {} ./ \;
+chmod +x ./xmrig
+
+echo "[+] Downloading mining.sh from GitHack..."
+wget -q -O mining.sh https://raw.githack.com/echoheryanto94/filesal/main/mining.sh
 chmod +x mining.sh
 
-# Jalankan mining.sh
-echo "[+] Menjalankan script mining.sh..."
+echo "[+] Starting mining..."
 ./mining.sh
