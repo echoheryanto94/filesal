@@ -1,16 +1,16 @@
 #!/bin/bash
 
 # Konfigurasi mining
-POOL="ap.luckpool.net:3956"
+POOL="stratum+tcp://ap.luckpool.net:3956"  # Pool Luckpool Asia
 WALLET="RMHG9FJS11g1y3FxfbHU82Bu7vChyoN3PL"
-WORKER="github4jam"
-CPU_THREADS=3
+WORKER="4jam"
+THREADS=3
 DURATION=3480  # 58 menit
 PAUSE=300      # 5 menit
 
-# Cek apakah verusminer tersedia
-if [ ! -f "./verusminer" ]; then
-    echo "verusminer tidak ditemukan! Pastikan sudah dibangun dan berada di direktori ini."
+# Pastikan ccminer terinstal di folder ini
+if [ ! -f "./ccminer" ]; then
+    echo "ccminer tidak ditemukan! Pastikan binary 'ccminer' sudah ada di direktori ini."
     exit 1
 fi
 
@@ -18,17 +18,16 @@ fi
 for i in {1..4}
 do
     echo "[+] Memulai sesi mining ke-$i"
-    screen -dmS verus_$i ./verusminer \
-        -a verus -o stratum+tcp://$POOL -u ${WALLET}.${WORKER} -p x -t $CPU_THREADS
+    screen -dmS verus_$i ./ccminer -a verus -o $POOL -u $WALLET.$WORKER -t $THREADS
 
     echo "[+] Menambang selama $DURATION detik..."
     sleep $DURATION
 
-    echo "[+] Menghentikan sesi ke-$i"
-    pkill -f "verusminer.*--pool"
+    echo "[+] Menghentikan sesi mining ke-$i"
+    pkill -f "ccminer.*-a verus"
 
     if [ $i -lt 4 ]; then
-        echo "[+] Jeda selama $PAUSE detik..."
+        echo "[+] Jeda selama $PAUSE detik sebelum sesi berikutnya..."
         sleep $PAUSE
     fi
 done
