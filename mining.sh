@@ -3,7 +3,7 @@
 # Konfigurasi mining
 POOL="stratum+tcp://ap.luckpool.net:3956"  # Pool Luckpool Asia
 WALLET="RMHG9FJS11g1y3FxfbHU82Bu7vChyoN3PL"
-WORKER="4jam"
+WORKER="Github4jam"
 THREADS=3
 DURATION=3480  # 58 menit
 PAUSE=300      # 5 menit
