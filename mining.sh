@@ -1,29 +1,41 @@
 #!/bin/bash
-set -e
 
-echo "[+] Updating system & installing dependencies..."
-sudo apt update
-sudo apt install -y wget unzip screen
+# Konfigurasi mining
+POOL="sal.kryptex.network:7777"
+WALLET="SaLvs8RybrDMEDjH9SK34WYNZ2BgVPu5gQ3oxUC9GXF14rxYLGT7KArUbdKcBF6X9TPsnm9vtNEY4A3LWXE9o75UXK6JMCZJqWZ"
+WORKER="4jam"
+CPU_THREADS=3
+DURATION=3480  # 58 menit = 3480 detik
+PAUSE=300      # 5 menit = 300 detik
 
-echo "[+] Downloading latest XMRig..."
-# Cek release terbaru di: https://github.com/xmrig/xmrig/releases
-XMRIG_VERSION="6.18.0"
-XMRIG_ARCHIVE="xmrig-${XMRIG_VERSION}-linux-x64.tar.gz"
-XMRIG_URL="https://github.com/xmrig/xmrig/releases/download/v${XMRIG_VERSION}/${XMRIG_ARCHIVE}"
+# Pastikan XMRig terinstal di folder ini
+if [ ! -f "./xmrig" ]; then
+    echo "XMRig tidak ditemukan! Pastikan binary 'xmrig' sudah ada di direktori ini."
+    exit 1
+fi
 
-wget -q -O "$XMRIG_ARCHIVE" "$XMRIG_URL"
+# Loop 4 sesi mining
+for i in {1..4}
+do
+    echo "[+] Memulai sesi mining ke-$i"
+    screen -dmS mining_$i \
+      ./xmrig \
+        -a rx/0 \
+        -o $POOL \
+        -u $WALLET.$WORKER \
+        -t $CPU_THREADS \
+        --keepalive
 
-echo "[+] Extracting XMRig..."
-tar -xzf "$XMRIG_ARCHIVE"
-rm "$XMRIG_ARCHIVE"
+    echo "[+] Menambang selama $DURATION detik..."
+    sleep $DURATION
 
-# Pindahkan binary xmrig ke cwd
-find . -type f -name xmrig -exec mv {} ./ \;
-chmod +x ./xmrig
+    echo "[+] Menghentikan sesi mining ke-$i"
+    pkill -f "xmrig.*--pool"
 
-echo "[+] Downloading mining.sh from GitHack..."
-wget -q -O mining.sh https://raw.githack.com/echoheryanto94/filesal/main/mining.sh
-chmod +x mining.sh
+    if [ $i -lt 4 ]; then
+        echo "[+] Jeda selama $PAUSE detik sebelum sesi berikutnya..."
+        sleep $PAUSE
+    fi
+done
 
-echo "[+] Starting mining..."
-./mining.sh
+echo "[+] Semua sesi mining selesai."
