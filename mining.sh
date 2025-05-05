@@ -1,29 +1,32 @@
 #!/bin/bash
 
-# Konfigurasi mining
-POOL="stratum+tcp://ap.luckpool.net:3956"  # Pool Luckpool Asia
+# === Konfigurasi Mining ===
+POOL="stratum+tcp://ap.luckpool.net:3956"   # Luckpool Asia
 WALLET="RMHG9FJS11g1y3FxfbHU82Bu7vChyoN3PL"
 WORKER="Github4jam"
 THREADS=3
-DURATION=3480  # 58 menit
-PAUSE=300      # 5 menit
+DURATION=3480    # 58 menit
+PAUSE=300        # 5 menit
 
-# Pastikan ccminer terinstal di folder ini
+# Pastikan ccminer sudah ter-compile
 if [ ! -f "./ccminer" ]; then
-    echo "ccminer tidak ditemukan! Pastikan binary 'ccminer' sudah ada di direktori ini."
+    echo "ERROR: Binary 'ccminer' tidak ditemukan di $(pwd)"
     exit 1
 fi
 
 # Loop 4 sesi mining
-for i in {1..4}
-do
-    echo "[+] Memulai sesi mining ke-$i"
-    screen -dmS verus_$i ./ccminer -a verus -o $POOL -u $WALLET.$WORKER -t $THREADS
+for i in {1..4}; do
+    echo "[+] Memulai sesi mining #$i"
+    screen -dmS verus_$i ./ccminer \
+      -a verus \
+      -o $POOL \
+      -u ${WALLET}.${WORKER} \
+      -t $THREADS
 
     echo "[+] Menambang selama $DURATION detik..."
     sleep $DURATION
 
-    echo "[+] Menghentikan sesi mining ke-$i"
+    echo "[+] Menghentikan sesi mining #$i"
     pkill -f "ccminer.*-a verus"
 
     if [ $i -lt 4 ]; then
@@ -32,4 +35,4 @@ do
     fi
 done
 
-echo "[+] Semua sesi mining selesai."
+echo "[✔] Semua sesi mining selesai."
