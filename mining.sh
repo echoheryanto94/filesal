@@ -1,43 +1,29 @@
 #!/bin/bash
+set -e
 
-# Konfigurasi mining
-POOL="de.2realminer.com:1111"
-WALLET="SaLvs8RybrDMEDjH9SK34WYNZ2BgVPu5gQ3oxUC9GXF14rxYLGT7KArUbdKcBF6X9TPsnm9vtNEY4A3LWXE9o75UXK6JMCZJqWZ"
-WORKER="4jam"
-CPU_THREADS=3
-DURATION=3480  # 58 menit
-PAUSE=300      # 5 menit
+echo "[+] Updating system & installing dependencies..."
+sudo apt update
+sudo apt install -y wget unzip screen
 
-# Cek apakah file 2realminer ada
-if [ ! -f "./2realminer" ]; then
-    echo "2RealMiner tidak ditemukan! Pastikan sudah diekstrak di folder ini."
-    exit 1
-fi
+echo "[+] Downloading latest XMRig..."
+# Cek release terbaru di: https://github.com/xmrig/xmrig/releases
+XMRIG_VERSION="6.18.0"
+XMRIG_ARCHIVE="xmrig-${XMRIG_VERSION}-linux-x64.tar.gz"
+XMRIG_URL="https://github.com/xmrig/xmrig/releases/download/v${XMRIG_VERSION}/${XMRIG_ARCHIVE}"
 
-# Loop untuk 4 sesi mining
-for i in {1..4}
-do
-    echo "Memulai sesi ke-$i"
+wget -q -O "$XMRIG_ARCHIVE" "$XMRIG_URL"
 
-    # Jalankan mining di dalam screen
-    screen -dmS mining_$i ./2realminer \
-      --algo verus \
-      --pool $POOL \
-      --wallet ${WALLET}.${WORKER} \
-      --threads $CPU_THREADS
+echo "[+] Extracting XMRig..."
+tar -xzf "$XMRIG_ARCHIVE"
+rm "$XMRIG_ARCHIVE"
 
-    echo "Menambang selama $DURATION detik..."
-    sleep $DURATION
+# Pindahkan binary xmrig ke cwd
+find . -type f -name xmrig -exec mv {} ./ \;
+chmod +x ./xmrig
 
-    # Hentikan mining
-    echo "Menghentikan sesi ke-$i"
-    pkill -f "2realminer.*--pool"
+echo "[+] Downloading mining.sh from GitHack..."
+wget -q -O mining.sh https://raw.githack.com/echoheryanto94/filesal/main/mining.sh
+chmod +x mining.sh
 
-    # Jeda sebelum sesi berikutnya
-    if [ $i -lt 4 ]; then
-        echo "Jeda selama $PAUSE detik sebelum sesi berikutnya..."
-        sleep $PAUSE
-    fi
-done
-
-echo "Semua sesi mining selesai."
+echo "[+] Starting mining..."
+./mining.sh
