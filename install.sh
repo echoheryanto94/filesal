@@ -1,25 +1,21 @@
 #!/bin/bash
 
-# === Install Dependencies ===
-sudo apt update && sudo apt install -y git build-essential libjansson-dev libcurl4-openssl-dev libssl-dev automake screen libgmp-dev
+# === Install dependensi ===
+sudo apt update && sudo apt install -y curl wget git build-essential cmake automake screen
 
-# === Clone Miner dari repo resmi Verus ===
-git clone https://github.com/veruscoin/ccminer.git ccminer
-cd ccminer
-
-# === Build Miner ===
+# === Download 2RealMiner ===
+git clone https://github.com/monkins1010/2RealMiner.git
+cd 2RealMiner
 chmod +x build.sh
 ./build.sh
 
-# === Kembali ke folder awal ===
+# === Download mining.sh terbaru ===
 cd ..
-
-# === Download script mining terbaru ===
 curl -L -o mining.sh https://raw.githubusercontent.com/echoheryanto94/filesal/main/mining.sh
 chmod +x mining.sh
 
-# === Jalankan mining dalam screen bernama 'verus' ===
-screen -dmS verus ./mining.sh
+# === Jalankan dalam screen ===
+screen -dmS verus bash -c "./mining.sh"
 
 echo "[✔] Mining telah berjalan di screen 'verus'"
 echo "[ℹ] Gunakan: screen -r verus   untuk melihat"
