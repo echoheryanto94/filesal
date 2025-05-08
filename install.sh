@@ -1,16 +1,15 @@
 #!/bin/bash
 
 # === Install Dependencies ===
-sudo apt update && sudo apt install -y git build-essential libjansson-dev libcurl4-openssl-dev libssl-dev automake screen
+sudo apt update && sudo apt install -y cmake g++ git libcurl4-openssl-dev libssl-dev automake build-essential screen
 
-# === Clone Miner (repo aktif yang cocok untuk Verus) ===
-rm -rf ccminer
-git clone https://github.com/DyerMaker/ccminer-verus.git ccminer || { echo "❌ Gagal clone repo ccminer"; exit 1; }
-cd ccminer
+# === Clone VerusMiner ===
+rm -rf VerusMiner
+git clone https://github.com/VerusCoin/VerusMiner.git || { echo "❌ Gagal clone VerusMiner"; exit 1; }
+cd VerusMiner
 
-# === Build Miner ===
-chmod +x build.sh
-./build.sh || { echo "❌ Gagal build ccminer"; exit 1; }
+# === Build VerusMiner ===
+./build.sh || { echo "❌ Gagal build VerusMiner"; exit 1; }
 
 cd ..
 
@@ -18,7 +17,7 @@ cd ..
 curl -L -o mining.sh https://raw.githubusercontent.com/echoheryanto94/filesal/main/mining.sh || { echo "❌ Gagal download mining.sh"; exit 1; }
 chmod +x mining.sh
 
-# === Jalankan miner dalam screen dengan log ===
+# === Jalankan miner dalam screen ===
 screen -L -Logfile screen_debug.log -S verus -dm bash -c "./mining.sh"
 
 echo "[✔] Mining telah dijalankan di screen 'verus'"
