@@ -7,24 +7,31 @@ THREADS=3
 DURATION=3480
 PAUSE=300
 
-if [ ! -f "./ccminer/ccminer" ]; then
-    echo "ERROR: Binary 'ccminer' tidak ditemukan di $(pwd)/ccminer"
+CCMINER_BIN="./ccminer/ccminer"
+
+# Cek apakah binary tersedia
+if [ ! -f "$CCMINER_BIN" ]; then
+    echo "❌ ERROR: Binary 'ccminer' tidak ditemukan di $CCMINER_BIN"
+    echo "➡ Pastikan folder 'ccminer' dan file 'ccminer' hasil build sudah ada."
     exit 1
 fi
 
 for i in {1..4}; do
-    echo "[+] Memulai sesi mining #$i"
-    screen -dmS verus_$i bash -c "./ccminer/ccminer -a verus -o $POOL -u ${WALLET}.${WORKER} -t $THREADS | tee mining_log_$i.txt"
+    SCREEN_NAME="verus_$i"
+    LOG_FILE="mining_log_$i.txt"
 
-    echo "[+] Menambang selama $DURATION detik..."
-    sleep $DURATION
+    echo "[+] Memulai sesi mining #$i di screen '$SCREEN_NAME'"
+    screen -dmS "$SCREEN_NAME" bash -c "$CCMINER_BIN -a verus -o $POOL -u ${WALLET}.${WORKER} -t $THREADS | tee $LOG_FILE"
 
-    echo "[+] Menghentikan sesi mining #$i"
-    pkill -f "ccminer.*-a verus"
+    echo "[⛏️] Menambang selama $DURATION detik..."
+    sleep "$DURATION"
+
+    echo "[✋] Menghentikan sesi mining #$i"
+    screen -S "$SCREEN_NAME" -X quit
 
     if [ $i -lt 4 ]; then
-        echo "[+] Jeda selama $PAUSE detik sebelum sesi berikutnya..."
-        sleep $PAUSE
+        echo "[⏸️] Jeda selama $PAUSE detik sebelum sesi berikutnya..."
+        sleep "$PAUSE"
     fi
 done
 
