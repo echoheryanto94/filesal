@@ -1,9 +1,9 @@
 #!/bin/bash
 
-# Konfigurasi mining Verus
-POOL="ap.luckpool.net:3956"
+# Konfigurasi mining
+POOL="stratum+tcp://luckpool.net:3956"
 WALLET="RMHG9FJS11g1y3FxfbHU82Bu7vChyoN3PL"
-WORKER="4jam"
+WORKER="Worker1"
 CPU_THREADS=3
 DURATION=3480  # Waktu mining per sesi dalam detik (58 menit)
 PAUSE=300      # Jeda antar sesi dalam detik (5 menit)
@@ -15,9 +15,9 @@ then
     exit 1
 fi
 
-# Cek apakah file verus miner ada
+# Cek apakah file verus ada
 if [ ! -f "./verus" ]; then
-    echo "File miner 'verus' tidak ditemukan! Pastikan sudah diekstrak dari verus.tar.gz"
+    echo "File 'verus' tidak ditemukan! Pastikan sudah diekstrak di folder saat ini"
     exit 1
 fi
 
@@ -27,12 +27,11 @@ do
     echo "Memulai sesi ke-$i"
 
     # Jalankan mining di dalam screen
-    screen -dmS github ./verus -a verus -o $POOL -u $WALLET.$WORKER -p x -t $CPU_THREADS
+    screen -dmS verus ./verus -a verus -o $POOL -u $WALLET.$WORKER -p x -t $CPU_THREADS
 
     echo "Menambang selama $DURATION detik..."
     sleep $DURATION
 
-    # Hentikan mining setelah durasi
     echo "Menghentikan sesi ke-$i"
     pkill verus
 
