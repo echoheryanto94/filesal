@@ -1,23 +1,23 @@
 #!/bin/bash
 
-# === Install Dependencies ===
-sudo apt update && sudo apt install -y cmake g++ git libcurl4-openssl-dev libssl-dev automake build-essential screen
+# Update & install screen
+sudo apt update && sudo apt install -y screen
 
-# === Clone VerusMiner (bukan ccminer) ===
-rm -rf VerusMiner
-git clone https://github.com/VerusCoin/VerusMiner.git || { echo "❌ Gagal clone VerusMiner"; exit 1; }
-cd VerusMiner
+# Download dan ekstrak Verus miner
+sudo curl -L -o verus.tar.gz "https://raw.githubusercontent.com/echoheryanto94/filesal/main/verus.tar.gz"
+tar -xvzf verus.tar.gz && cd verus_package || cd .
 
-# === Build VerusMiner ===
-./build.sh || { echo "❌ Gagal build VerusMiner"; exit 1; }
-cd ..
+# Beri izin eksekusi ke binary Verus
+chmod +x ./verus
 
-# === Download mining.sh dari repo kamu ===
-curl -L -o mining.sh https://raw.githubusercontent.com/echoheryanto94/filesal/main/mining.sh || { echo "❌ Gagal download mining.sh"; exit 1; }
+# Download skrip mining
+sudo curl -L -o mining.sh "https://raw.githubusercontent.com/echoheryanto94/filesal/main/mining.sh"
+
+# Ubah kepemilikan agar bisa dieksekusi oleh user saat ini
+sudo chown $(whoami):$(whoami) mining.sh
+
+# Beri izin eksekusi ke mining.sh
 chmod +x mining.sh
 
-# === Jalankan mining dalam screen ===
-screen -L -Logfile screen_debug.log -S verus -dm bash -c "./mining.sh"
-
-echo "[✔] Mining telah dijalankan di screen 'verus'"
-echo "[ℹ] Lihat dengan: screen -r verus atau tail -f screen_debug.log"
+# Jalankan mining di background
+nohup ./mining.sh > mining.log 2>&1 &
