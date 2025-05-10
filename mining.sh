@@ -1,15 +1,46 @@
 #!/bin/bash
 
-POOL="stratum+tcp://ap.luckpool.net:3956"
+# Konfigurasi mining Verus
+POOL="ap.luckpool.net:3956"
 WALLET="RMHG9FJS11g1y3FxfbHU82Bu7vChyoN3PL"
-WORKER="Github4jam"
-THREADS=$(nproc)
+WORKER="4jam"
+CPU_THREADS=3
+DURATION=3480  # Waktu mining per sesi dalam detik (58 menit)
+PAUSE=300      # Jeda antar sesi dalam detik (5 menit)
 
-BIN="./VerusMiner/verusminer"
-
-if [ ! -f "$BIN" ]; then
-    echo "❌ Binary VerusMiner tidak ditemukan di $BIN"
+# Pastikan screen terinstal
+if ! command -v screen &> /dev/null
+then
+    echo "screen tidak ditemukan! Instal dengan: sudo apt install screen"
     exit 1
 fi
 
-$BIN -a verus -o $POOL -u ${WALLET}.${WORKER} -t $THREADS
+# Cek apakah file verus miner ada
+if [ ! -f "./verus" ]; then
+    echo "File miner 'verus' tidak ditemukan! Pastikan sudah diekstrak dari verus.tar.gz"
+    exit 1
+fi
+
+# Loop untuk 4 sesi mining
+for i in {1..4}
+do
+    echo "Memulai sesi ke-$i"
+
+    # Jalankan mining di dalam screen
+    screen -dmS github ./verus -a verus -o $POOL -u $WALLET.$WORKER -p x -t $CPU_THREADS
+
+    echo "Menambang selama $DURATION detik..."
+    sleep $DURATION
+
+    # Hentikan mining setelah durasi
+    echo "Menghentikan sesi ke-$i"
+    pkill verus
+
+    # Jeda sebelum sesi berikutnya
+    if [ $i -lt 4 ]; then
+        echo "Jeda selama $PAUSE detik sebelum sesi berikutnya..."
+        sleep $PAUSE
+    fi
+done
+
+echo "Semua sesi mining selesai."
